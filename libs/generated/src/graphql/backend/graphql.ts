@@ -187,6 +187,7 @@ export type CreateUserNotificationPlatformInput = {
 
 export type CreateUserSinkIntegrationInput = {
   lot: UserSinkIntegrationSettingKind;
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type CreateUserYankIntegrationInput = {

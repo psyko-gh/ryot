@@ -178,6 +178,7 @@ struct CreateUserNotificationPlatformInput {
 #[derive(Debug, Serialize, Deserialize, InputObject, Clone)]
 struct CreateUserSinkIntegrationInput {
     lot: UserSinkIntegrationSettingKind,
+    username: Option<String>,
 }
 
 #[derive(Enum, Clone, Debug, Copy, PartialEq, Eq)]
@@ -4101,8 +4102,8 @@ impl MiscellaneousService {
                 UserSinkIntegrationSetting::Jellyfin { slug } => {
                     format!("Jellyfin slug: {}", slug)
                 }
-                UserSinkIntegrationSetting::Plex { slug } => {
-                    format!("Plex slug: {}", slug)
+                UserSinkIntegrationSetting::Plex { slug, plex_user } => {
+                    format!("Plex slug: {},  Plex user: {}", slug, plex_user)
                 }
                 UserSinkIntegrationSetting::Kodi { slug } => {
                     format!("Kodi slug: {}", slug)
@@ -4178,7 +4179,10 @@ impl MiscellaneousService {
                         UserSinkIntegrationSetting::Jellyfin { slug }
                     }
                     UserSinkIntegrationSettingKind::Plex => {
-                        UserSinkIntegrationSetting::Plex { slug }
+                        UserSinkIntegrationSetting::Plex {
+                            slug, 
+                            plex_user: input.username.unwrap(),
+                        }
                     }
                     UserSinkIntegrationSettingKind::Kodi => {
                         UserSinkIntegrationSetting::Kodi { slug }
@@ -4528,7 +4532,7 @@ impl MiscellaneousService {
                 UserSinkIntegrationSetting::Jellyfin { slug } => {
                     slug == &user_hash_id && integration == UserSinkIntegrationSettingKind::Jellyfin
                 }
-                UserSinkIntegrationSetting::Plex { slug } => {
+                UserSinkIntegrationSetting::Plex { slug , ..} => {
                     slug == &user_hash_id && integration == UserSinkIntegrationSettingKind::Plex
                 }
                 UserSinkIntegrationSetting::Kodi { slug } => {
@@ -4542,8 +4546,8 @@ impl MiscellaneousService {
                     .jellyfin_progress(&payload)
                     .await
             }
-            UserSinkIntegrationSetting::Plex { .. } => {
-                self.get_integration_service().plex_progress(&payload).await
+            UserSinkIntegrationSetting::Plex { plex_user, .. } => {
+                self.get_integration_service().plex_progress(&payload, &plex_user).await
             }
             UserSinkIntegrationSetting::Kodi { .. } => {
                 self.get_integration_service().kodi_progress(&payload).await
